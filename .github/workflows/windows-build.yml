@@ -63,26 +63,55 @@ jobs:
             share
           key: ${{ runner.os }}-deps-${{ hashFiles('submodule-status') }}
 
-      - name: Build dependencies
+      - name: Build for x86
         if: steps.cache-deps.outputs.cache-hit != 'true'
-        run: .\build.bat deps
-
-      - name: Install Rime plugins
-        run: .\action-install-plugins-windows.bat
-
-      - name: Build and test
-        run: .\build.bat test
-
-      - name: Create distributable
         run: |
-          7z a rime-${{ env.git_ref_name }}-${{ runner.os }}.7z `
+          .\build.bat clean
+          .\build.bat deps
+          .\action-install-plugins-windows.bat
+          .\build.bat test
+          7z a rime-${{ env.git_ref_name }}-${{ runner.os }}-${{ env.ARCH }}.7z `
           dist version-info.txt
-          7z a -x'!*/.placeholder' rime-deps-${{ env.git_ref_name }}-${{ runner.os }}.7z `
+          7z a -x'!*/.placeholder' rime-deps-${{ env.git_ref_name }}-${{ runner.os }}-${{ env.ARCH }}.7z `
           bin include lib share
+        env:
+          ARCH: Win32
+
+      - name: Build for x64
+        if: steps.cache-deps.outputs.cache-hit != 'true'
+        run: |
+          .\build.bat clean
+          .\build.bat deps
+          .\action-install-plugins-windows.bat
+          .\build.bat test
+          7z a rime-${{ env.git_ref_name }}-${{ runner.os }}-${{ env.ARCH }}.7z `
+          dist version-info.txt
+          7z a -x'!*/.placeholder' rime-deps-${{ env.git_ref_name }}-${{ runner.os }}-${{ env.ARCH }}.7z `
+          bin include lib share
+        env:
+          ARCH: x64
+
+      - name: Build for arm64
+        if: steps.cache-deps.outputs.cache-hit != 'true'
+        run: |
+          .\build.bat clean
+          .\build.bat deps
+          .\action-install-plugins-windows.bat
+          .\build.bat librime
+          7z a rime-${{ env.git_ref_name }}-${{ runner.os }}-${{ env.ARCH }}.7z `
+          dist version-info.txt
+          7z a -x'!*/.placeholder' rime-deps-${{ env.git_ref_name }}-${{ runner.os }}-${{ env.ARCH }}.7z `
+          bin include lib share
+        env:
+          ARCH: arm64
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v3
         with:
           path: |
-            rime-${{ env.git_ref_name }}-${{ runner.os }}.7z
-            rime-deps-${{ env.git_ref_name }}-${{ runner.os }}.7z
+            rime-${{ env.git_ref_name }}-${{ runner.os }}-x86.7z
+            rime-deps-${{ env.git_ref_name }}-${{ runner.os }}-x86.7z
+            rime-${{ env.git_ref_name }}-${{ runner.os }}-x64.7z
+            rime-deps-${{ env.git_ref_name }}-${{ runner.os }}-x64.7z
+            rime-${{ env.git_ref_name }}-${{ runner.os }}-arm64.7z
+            rime-deps-${{ env.git_ref_name }}-${{ runner.os }}-arm64.7z
