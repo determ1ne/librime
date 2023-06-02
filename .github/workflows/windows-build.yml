@@ -57,17 +57,6 @@ jobs:
         uses: actions/cache@v3
         with:
           path: |
-            bin
-            include
-            lib
-            share
-          key: ${{ runner.os }}-deps-${{ hashFiles('submodule-status') }}
-
-      - name: Cache dependencies
-        id: cache-deps
-        uses: actions/cache@v3
-        with:
-          path: |
             bin-x86
             bin-x64
             bin-arm64
@@ -78,21 +67,14 @@ jobs:
             share
           key: ${{ runner.os }}-deps-${{ hashFiles('submodule-status') }}
 
-      - name: Build dependencies
+      - name: Build dependencies for x86
         if: steps.cache-deps.outputs.cache-hit != 'true'
         run: |
-          set ARCH=Win32
           .\build.bat deps
           xcopy bin bin-x86 /E/H/C/I
           xcopy lib lib-x86 /E/H/C/I
-          set ARCH=x64
-          .\build.bat deps
-          xcopy bin bin-x64 /E/H/C/I
-          xcopy lib lib-x64 /E/H/C/I
-          set ARCH=arm64
-          .\build.bat deps
-          xcopy bin bin-arm64 /E/H/C/I
-          xcopy lib lib-arm64 /E/H/C/I
+        env:
+          ARCH: Win32
 
       - name: Build for x86
         run: |
@@ -109,6 +91,15 @@ jobs:
         env:
           ARCH: Win32
 
+      - name: Build dependencies for x64
+        if: steps.cache-deps.outputs.cache-hit != 'true'
+        run: |
+          .\build.bat deps
+          xcopy bin bin-x64 /E/H/C/I
+          xcopy lib lib-x64 /E/H/C/I
+        env:
+          ARCH: x64
+
       - name: Build for x64
         run: |
           rmdir bin /S/Q
@@ -123,6 +114,15 @@ jobs:
           bin include lib share
         env:
           ARCH: x64
+
+      - name: Build dependencies for arm64
+        if: steps.cache-deps.outputs.cache-hit != 'true'
+        run: |
+          .\build.bat deps
+          xcopy bin bin-arm64 /E/H/C/I
+          xcopy lib lib-arm64 /E/H/C/I
+        env:
+          ARCH: arm64
 
       - name: Build for arm64
         run: |
