@@ -131,7 +131,7 @@ jobs:
           xcopy bin-arm64 bin /E/H/C/I
           xcopy lib-arm64 lib /E/H/C/I
           .\action-install-plugins-windows.bat
-          .\build.bat test
+          .\build.bat librime
           7z a rime-${{ env.git_ref_name }}-${{ runner.os }}-${{ env.ARCH }}.7z `
           dist version-info.txt
           7z a -x'!*/.placeholder' rime-deps-${{ env.git_ref_name }}-${{ runner.os }}-${{ env.ARCH }}.7z `

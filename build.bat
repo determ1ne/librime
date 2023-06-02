@@ -120,7 +120,7 @@ if %clean% == 1 (
   rmdir /s /q deps\yaml-cpp\build
 )
 
-set build_dir=%build_dir_base%%build_dir_suffix%
+set build_dir=%build_dir_base%-%ARCH%%build_dir_suffix%
 
 rem set curl=%RIME_ROOT%\bin\curl.exe
 rem set download="%curl%" --remote-name-all
