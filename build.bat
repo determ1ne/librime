@@ -34,8 +34,10 @@ set build_dir_base=build
 set build_dir_suffix=
 set build_config=Release
 set build_boost=0
+set build_boost_x86=0
 set build_boost_x64=0
 set build_boost_arm64=0
+set build_boost_all=0
 set boost_build_variant=release
 set build_deps=0
 set build_librime=0
@@ -46,13 +48,22 @@ set enable_logging=ON
 :parse_cmdline_options
 if "%1" == "" goto end_parsing_cmdline_options
 if "%1" == "clean" set clean=1
-if "%1" == "boost" set build_boost=1
+if "%1" == "boost_x86" (
+  set build_boost=1
+  set build_boost_x86=1
+)
 if "%1" == "boost_x64" (
   set build_boost=1
   set build_boost_x64=1
 )
 if "%1" == "boost_arm64" (
   set build_boost=1
+  set build_boost_arm64=1
+)
+if "%1" == "boost_all" (
+  set build_boost=1
+  set build_boost_x86=1
+  set build_boost_x64=1
   set build_boost_arm64=1
 )
 if "%1" == "deps" set build_deps=1
@@ -151,17 +162,21 @@ if %build_boost% == 1 (
   if not exist b2.exe call .\bootstrap.bat
   if errorlevel 1 goto error
 
-  if %build_boost_arm64% == 1 (
-    b2 %bjam_options_arm64% stage %boost_compiled_libs%
-  ) else (
+  if %build_boost_x86% == 1 (
     b2 %bjam_options_x86% stage %boost_compiled_libs%
+    if errorlevel 1 goto error
   )
-  if errorlevel 1 goto error
 
   if %build_boost_x64% == 1 (
     b2 %bjam_options_x64% stage %boost_compiled_libs%
     if errorlevel 1 goto error
   )
+
+  if %build_boost_arm64% == 1 (
+    b2 %bjam_options_arm64% stage %boost_compiled_libs%
+    if errorlevel 1 goto error
+  )
+
   popd
 )
 
